@@ -15,6 +15,23 @@
                 + Add Note
             </button>
         </header>
+
+        <!-- Ringkasan Keuangan -->
+        <div class="mb-4 p-4 bg-white rounded shadow flex justify-between">
+            <div>
+                <h2 class="text-xl font-bold">Total Balance</h2>
+                <p id="totalBalance" class="text-2xl text-gray-800">Rp 0</p>
+            </div>
+            <div>
+                <h2 class="text-xl font-bold">Total Income</h2>
+                <p id="totalIncome" class="text-green-500 text-2xl">Rp 0</p>
+            </div>
+            <div>
+                <h2 class="text-xl font-bold">Total Expense</h2>
+                <p id="totalExpense" class="text-red-500 text-2xl">Rp 0</p>
+            </div>
+        </div>
+
         <main>
             <div id="notesContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
         </main>
@@ -45,7 +62,7 @@
         </div>
     </div>
 
-    <!-- Load JavaScript dari folder js -->
+    <!-- Load JavaScript -->
     <script src="js/script.js"></script>
 </body>
 </html>
