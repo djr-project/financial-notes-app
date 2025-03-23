@@ -1,84 +1,98 @@
-document.addEventListener('DOMContentLoaded', async () => {
-    const addNoteBtn = document.getElementById('addNoteBtn');
-    const noteModal = document.getElementById('noteModal');
-    const cancelBtn = document.getElementById('cancelBtn');
-    const noteForm = document.getElementById('noteForm');
-    const notesContainer = document.getElementById('notesContainer');
-    
-    let db;
+document.addEventListener("DOMContentLoaded", function () {
+    let transactions = JSON.parse(localStorage.getItem("transactions")) || [];
 
-    async function initDB() {
-        const SQL = await initSqlJs({ locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${file}` });
-        db = new SQL.Database();
-        db.run("CREATE TABLE IF NOT EXISTS notes (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT, amount REAL, date TEXT)");
-        renderNotes();
+    const addNoteBtn = document.getElementById("addNoteBtn");
+    const noteModal = document.getElementById("noteModal");
+    const noteForm = document.getElementById("noteForm");
+    const notesContainer = document.getElementById("notesContainer");
+
+    function saveTransactions() {
+        localStorage.setItem("transactions", JSON.stringify(transactions));
     }
 
-    addNoteBtn.addEventListener('click', () => {
-        noteModal.classList.remove('hidden');
-    });
+    function renderTransactions(filteredTransactions = transactions) {
+        notesContainer.innerHTML = "";
+        let totalIncome = 0, totalExpense = 0, totalBalance = 0;
 
-    cancelBtn.addEventListener('click', () => {
-        noteModal.classList.add('hidden');
-    });
+        filteredTransactions.forEach((transaction, index) => {
+            let color = transaction.type === "income" ? "text-green-500" : "text-red-500";
 
-    noteForm.addEventListener('submit', (e) => {
+            let noteItem = document.createElement("div");
+            noteItem.classList.add("p-4", "border", "rounded", "shadow");
+            noteItem.setAttribute("data-date", transaction.date);
+            noteItem.innerHTML = `
+                <h3 class="text-lg font-semibold">${transaction.title}</h3>
+                <p class="${color} text-lg font-bold">Rp ${transaction.amount}</p>
+                <p class="text-sm text-gray-500">${transaction.date}</p>
+                <button data-index="${index}" class="delete-btn mt-2 bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">Hapus</button>
+            `;
+
+            notesContainer.appendChild(noteItem);
+
+            if (transaction.type === "income") {
+                totalIncome += transaction.amount;
+            } else {
+                totalExpense += transaction.amount;
+            }
+        });
+
+        totalBalance = totalIncome - totalExpense;
+        document.getElementById("totalIncome").textContent = `Rp ${totalIncome}`;
+        document.getElementById("totalExpense").textContent = `Rp ${totalExpense}`;
+        document.getElementById("totalBalance").textContent = `Rp ${totalBalance}`;
+
+        // Tambahkan event listener untuk tombol hapus
+        document.querySelectorAll(".delete-btn").forEach(button => {
+            button.addEventListener("click", function () {
+                let index = this.getAttribute("data-index");
+                deleteTransaction(index);
+            });
+        });
+    }
+
+    function deleteTransaction(index) {
+        transactions.splice(index, 1);
+        saveTransactions();
+        renderTransactions();
+    }
+
+    noteForm.addEventListener("submit", function (e) {
         e.preventDefault();
-        const title = document.getElementById('title').value;
-        const amount = document.getElementById('amount').value;
-        const date = document.getElementById('date').value;
+        const title = document.getElementById("title").value;
+        const amount = parseFloat(document.getElementById("amount").value);
+        const date = document.getElementById("date").value;
+        const type = document.getElementById("type").value; // Ambil tipe transaksi dari dropdown
 
-        db.run("INSERT INTO notes (title, amount, date) VALUES (?, ?, ?)", [title, amount, date]);
-        renderNotes();
-        noteModal.classList.add('hidden');
+        transactions.push({ title, amount, date, type });
+        saveTransactions();
+        renderTransactions();
+        noteModal.classList.add("hidden");
         noteForm.reset();
     });
 
-    async function renderSummary() {
-        let totalIncome = 0;
-        let totalExpense = 0;
+    addNoteBtn.addEventListener("click", function () {
+        noteModal.classList.remove("hidden");
+    });
 
-        const stmt = db.prepare("SELECT amount FROM notes");
-        while (stmt.step()) {
-            let amount = stmt.getAsObject().amount;
-            amount = parseFloat(amount);
+    document.getElementById("cancelBtn").addEventListener("click", function () {
+        noteModal.classList.add("hidden");
+    });
 
-            if (amount > 0) {
-                totalIncome += amount;
+    // Filter Berdasarkan Jenis
+    document.querySelectorAll(".filter-btn").forEach(button => {
+        button.addEventListener("click", function () {
+            document.querySelectorAll(".filter-btn").forEach(btn => btn.classList.remove("active"));
+            this.classList.add("active");
+
+            const filterType = this.getAttribute("data-filter");
+
+            if (filterType === "all") {
+                renderTransactions();
             } else {
-                totalExpense += amount;
+                renderTransactions(transactions.filter(trx => trx.type === filterType));
             }
-        }
-        stmt.free();
+        });
+    });
 
-        document.getElementById("totalIncome").textContent = `Rp ${totalIncome.toLocaleString()}`;
-        document.getElementById("totalExpense").textContent = `Rp ${Math.abs(totalExpense).toLocaleString()}`;
-        document.getElementById("totalBalance").textContent = `Rp ${(totalIncome + totalExpense).toLocaleString()}`;
-    }
-
-    async function renderNotes() {
-        notesContainer.innerHTML = '';
-        const stmt = db.prepare("SELECT * FROM notes");
-        while (stmt.step()) {
-            const note = stmt.getAsObject();
-            const noteElement = document.createElement('div');
-            noteElement.classList.add('bg-white', 'p-4', 'rounded', 'shadow');
-            noteElement.innerHTML = `
-                <h3 class="text-lg font-bold">${note.title}</h3>
-                <p class="text-gray-700">Amount: Rp ${parseFloat(note.amount).toLocaleString()}</p>
-                <p class="text-gray-700">Date: ${note.date}</p>
-                <button class="bg-red-500 text-white px-2 py-1 rounded mt-2" onclick="deleteNote(${note.id})">Delete</button>
-            `;
-            notesContainer.appendChild(noteElement);
-        }
-        stmt.free();
-        renderSummary();
-    }
-
-    window.deleteNote = async (id) => {
-        db.run("DELETE FROM notes WHERE id = ?", [id]);
-        renderNotes();
-    };
-
-    await initDB();
+    renderTransactions();
 });

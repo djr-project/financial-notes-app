@@ -3,34 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Financial Notes App</title>
+    <title>Catatan Keuangan App</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
+    <link rel="stylesheet" href="css/styles.css">
 </head>
-<body class="bg-gray-100">
+<body>
     <div class="container mx-auto p-4">
         <header class="flex justify-between items-center py-4">
-            <h1 class="text-2xl font-bold">Financial Notes</h1>
+            <h1 class="text-2xl font-bold">Catatan Keuangan</h1>
             <button id="addNoteBtn" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
-                + Add Note
+                + Tambah
             </button>
         </header>
 
         <!-- Ringkasan Keuangan -->
-        <div class="mb-4 p-4 bg-white rounded shadow flex justify-between">
-            <div>
-                <h2 class="text-xl font-bold">Total Balance</h2>
-                <p id="totalBalance" class="text-2xl text-gray-800">Rp 0</p>
+        <div class="mb-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Saldo -->
+            <div class="p-4 card flex flex-col items-center summary-saldo">
+                <div class="saldo-wrapper">
+                    <h2 class="text-md font-semibold">Saldo</h2>
+                    <p id="totalBalance" class="text-2xl font-bold">Rp 0</p>
+                </div>
             </div>
-            <div>
-                <h2 class="text-xl font-bold">Total Income</h2>
-                <p id="totalIncome" class="text-green-500 text-2xl">Rp 0</p>
-            </div>
-            <div>
-                <h2 class="text-xl font-bold">Total Expense</h2>
-                <p id="totalExpense" class="text-red-500 text-2xl">Rp 0</p>
+
+            <!-- Pemasukan & Pengeluaran -->
+            <div class="p-4 card flex justify-between summary-container">
+                <div class="summary-item">
+                    <h2 class="text-md font-semibold text-gray-700">Pemasukan</h2>
+                    <p id="totalIncome" class="text-green-500 text-lg font-bold">Rp 0</p>
+                </div>
+                <div class="summary-item">
+                    <h2 class="text-md font-semibold text-gray-700">Pengeluaran</h2>
+                    <p id="totalExpense" class="text-red-500 text-lg font-bold">Rp 0</p>
+                </div>
             </div>
         </div>
+
+        <!-- Filter -->
+        <div class="flex justify-center mb-4 space-x-2">
+            <button class="filter-btn active" data-filter="all">Semua</button>
+            <button class="filter-btn" data-filter="income">Pemasukan</button>
+            <button class="filter-btn" data-filter="expense">Pengeluaran</button>
+        </div>
+
+
+
+
+        <!-- Container untuk catatan keuangan -->
+        <div id="notesContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+
 
         <main>
             <div id="notesContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
@@ -38,8 +59,8 @@
     </div>
 
     <!-- Modal -->
-    <div id="noteModal" class="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center hidden">
-        <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
+    <div id="noteModal" class="fixed inset-0 fade hidden items-center justify-center">
+        <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md modal">
             <h2 id="modalTitle" class="text-xl font-bold mb-4">Add Note</h2>
             <form id="noteForm">
                 <div class="mb-4">
@@ -50,6 +71,16 @@
                     <label for="amount" class="block text-gray-700">Amount</label>
                     <input type="number" id="amount" class="w-full px-3 py-2 border rounded" required>
                 </div>
+
+                <!-- Tambahan: Pilihan Pemasukan / Pengeluaran -->
+                <div class="mb-4">
+                    <label for="type" class="block text-gray-700">Jenis Transaksi</label>
+                    <select id="type" class="w-full px-3 py-2 border rounded">
+                        <option value="income">Pemasukan</option>
+                        <option value="expense">Pengeluaran</option>
+                    </select>
+                </div>
+                
                 <div class="mb-4">
                     <label for="date" class="block text-gray-700">Date</label>
                     <input type="date" id="date" class="w-full px-3 py-2 border rounded" required>
@@ -62,7 +93,7 @@
         </div>
     </div>
 
-    <!-- Load JavaScript -->
+
     <script src="js/script.js"></script>
 </body>
 </html>

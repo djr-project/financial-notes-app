@@ -1,0 +1,98 @@
+/* Styling untuk Saldo */
+.summary-saldo {
+    background: linear-gradient(135deg, #4F46E5, #6366F1); /* Gradasi warna biru */
+    border-radius: 12px;
+    text-align: center;
+    padding: 20px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Wrapper transparan agar teks lebih terbaca */
+.saldo-wrapper {
+    /* background: rgba(255, 255, 255, 0.2);  */
+    padding: 12px;
+    border-radius: 8px;
+    display: inline-block;
+}
+
+.saldo-wrapper h2,
+.saldo-wrapper p {
+    color: #fff; /* Warna teks putih */
+}
+
+/* Hover efek agar lebih interaktif */
+.summary-saldo:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+/* Styling untuk Pemasukan & Pengeluaran */
+.summary-container {
+    display: flex;
+    justify-content: space-between;
+    background: #c3e1ff;
+    border-radius: 12px;
+    padding: 16px;
+}
+
+.summary-item {
+    text-align: center;
+    flex: 1;
+}
+
+.summary-item h2 {
+    font-size: 14px;
+    color: #555;
+}
+
+.summary-item p {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+
+/* Styling tombol filter */
+.filter-btn {
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.3s ease, transform 0.2s;
+    background: #e5e7eb;
+    color: #333;
+    border: none;
+}
+
+.filter-btn.active {
+    background: #4F46E5;
+    color: rgb(255, 255, 255);
+}
+
+.filter-btn:hover {
+    transform: scale(1.05);
+    background: #c3e1ff;
+    color: #333;
+}
+
+/* Styling untuk dropdown filter */
+.filter-select {
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: bold;
+    border: 1px solid #ccc;
+    background: white;
+    cursor: pointer;
+    outline: none;
+    transition: all 0.3s ease;
+    width: 160px;
+}
+
+/* Hover & focus effect */
+.filter-select:hover,
+.filter-select:focus {
+    border-color: #6366F1; /* Warna biru elegan */
+    box-shadow: 0 4px 8px rgba(99, 102, 241, 0.2);
+}
