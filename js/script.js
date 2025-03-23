@@ -5,34 +5,47 @@ document.addEventListener('DOMContentLoaded', async () => {
     const noteForm = document.getElementById('noteForm');
     const notesContainer = document.getElementById('notesContainer');
 
-    let db, fileHandle, fileStream, writer;
+    let db;
+    let fileHandle, fileStream;
 
     async function initDB() {
-        const SQL = await initSqlJs({ locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${file}` });
-
-        // Akses OPFS untuk penyimpanan database
-        fileHandle = await navigator.storage.getDirectory();
-        fileHandle = await fileHandle.getFileHandle('financial_notes.db', { create: true });
-        fileStream = await fileHandle.createWritable();
-
         try {
-            const file = await fileHandle.getFile();
-            const buffer = await file.arrayBuffer();
-            db = new SQL.Database(new Uint8Array(buffer));
-        } catch {
-            db = new SQL.Database();
-            db.run("CREATE TABLE IF NOT EXISTS notes (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT, amount REAL, date TEXT)");
-            saveDB();
-        }
+            const SQL = await initSqlJs({ locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.6.2/${file}` });
 
-        renderNotes();
+            // Cek apakah browser mendukung OPFS
+            if (!navigator.storage || !navigator.storage.getDirectory) {
+                alert("Browser tidak mendukung OPFS! Gunakan Chrome atau Edge terbaru.");
+                return;
+            }
+
+            fileHandle = await navigator.storage.getDirectory();
+            fileHandle = await fileHandle.getFileHandle('financial_notes.db', { create: true });
+
+            try {
+                const file = await fileHandle.getFile();
+                const buffer = await file.arrayBuffer();
+                db = new SQL.Database(new Uint8Array(buffer));
+            } catch (error) {
+                db = new SQL.Database();
+                db.run("CREATE TABLE IF NOT EXISTS notes (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT, amount REAL, date TEXT)");
+                await saveDB();
+            }
+
+            renderNotes();
+        } catch (error) {
+            console.error("Error initializing database:", error);
+        }
     }
 
     async function saveDB() {
-        const data = db.export();
-        await fileStream.write(data);
-        await fileStream.close();
-        fileStream = await fileHandle.createWritable();
+        try {
+            const data = db.export();
+            fileStream = await fileHandle.createWritable();
+            await fileStream.write(data);
+            await fileStream.close();
+        } catch (error) {
+            console.error("Error saving database:", error);
+        }
     }
 
     addNoteBtn.addEventListener('click', () => {
