@@ -6,42 +6,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     const notesContainer = document.getElementById('notesContainer');
 
     let db;
-    let SQL;
-    
+
     async function initDB() {
-        SQL = await initSqlJs({ locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${file}` });
-
-        // Gunakan OPFS untuk menyimpan database secara persisten
-        if (!window.showDirectoryPicker) {
-            alert("Browser Anda tidak mendukung OPFS. Coba gunakan Chrome atau Edge terbaru.");
-            return;
-        }
-
-        const root = await navigator.storage.getDirectory();
-        const dbFile = await root.getFileHandle("financial-notes.sqlite", { create: true });
-        const writableStream = await dbFile.createWritable();
-
-        // Cek apakah ada database lama yang bisa dimuat
-        const file = await dbFile.getFile();
-        if (file.size > 0) {
-            const buffer = await file.arrayBuffer();
-            db = new SQL.Database(new Uint8Array(buffer));
-        } else {
-            db = new SQL.Database();
-            db.run("CREATE TABLE IF NOT EXISTS notes (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT, amount REAL, date TEXT)");
-            await saveDB();
-        }
-
+        const SQL = await initSqlJs({ locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${file}` });
+        db = new SQL.Database();
+        db.run("CREATE TABLE IF NOT EXISTS notes (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT, amount REAL, date TEXT)");
         renderNotes();
-    }
-
-    async function saveDB() {
-        const root = await navigator.storage.getDirectory();
-        const dbFile = await root.getFileHandle("financial-notes.sqlite", { create: true });
-        const writableStream = await dbFile.createWritable();
-        const buffer = db.export();
-        await writableStream.write(buffer);
-        await writableStream.close();
     }
 
     addNoteBtn.addEventListener('click', () => {
@@ -52,20 +22,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         noteModal.classList.add('hidden');
     });
 
-    noteForm.addEventListener('submit', async (e) => {
+    noteForm.addEventListener('submit', (e) => {
         e.preventDefault();
         const title = document.getElementById('title').value;
         const amount = document.getElementById('amount').value;
         const date = document.getElementById('date').value;
 
         db.run("INSERT INTO notes (title, amount, date) VALUES (?, ?, ?)", [title, amount, date]);
-        await saveDB();
         renderNotes();
         noteModal.classList.add('hidden');
         noteForm.reset();
     });
 
-    async function renderNotes() {
+    function renderNotes() {
         notesContainer.innerHTML = '';
         const stmt = db.prepare("SELECT * FROM notes");
         while (stmt.step()) {
@@ -83,9 +52,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         stmt.free();
     }
 
-    window.deleteNote = async (id) => {
+    window.deleteNote = (id) => {
         db.run("DELETE FROM notes WHERE id = ?", [id]);
-        await saveDB();
         renderNotes();
     };
 
