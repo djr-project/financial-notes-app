@@ -5,9 +5,19 @@ document.addEventListener("DOMContentLoaded", function () {
     const noteModal = document.getElementById("noteModal");
     const noteForm = document.getElementById("noteForm");
     const notesContainer = document.getElementById("notesContainer");
+    const amountInput = document.getElementById("amount");
 
     function saveTransactions() {
         localStorage.setItem("transactions", JSON.stringify(transactions));
+    }
+
+    function formatRupiah(angka) {
+        let numberString = angka.toString().replace(/[^0-9]/g, ""); // Hanya angka
+        return numberString ? "Rp " + parseInt(numberString).toLocaleString("id-ID") : "";
+    }
+
+    function unformatRupiah(rupiahString) {
+        return parseInt(rupiahString.replace(/[^0-9]/g, "")) || 0;
     }
 
     function renderTransactions(filteredTransactions = transactions) {
@@ -22,7 +32,7 @@ document.addEventListener("DOMContentLoaded", function () {
             noteItem.setAttribute("data-date", transaction.date);
             noteItem.innerHTML = `
                 <h3 class="text-lg font-semibold">${transaction.title}</h3>
-                <p class="${color} text-lg font-bold">Rp ${transaction.amount}</p>
+                <p class="${color} text-lg font-bold">${formatRupiah(transaction.amount)}</p>
                 <p class="text-sm text-gray-500">${transaction.date}</p>
                 <button data-index="${index}" class="delete-btn mt-2 bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">Hapus</button>
             `;
@@ -37,11 +47,10 @@ document.addEventListener("DOMContentLoaded", function () {
         });
 
         totalBalance = totalIncome - totalExpense;
-        document.getElementById("totalIncome").textContent = `Rp ${totalIncome}`;
-        document.getElementById("totalExpense").textContent = `Rp ${totalExpense}`;
-        document.getElementById("totalBalance").textContent = `Rp ${totalBalance}`;
+        document.getElementById("totalIncome").textContent = formatRupiah(totalIncome);
+        document.getElementById("totalExpense").textContent = formatRupiah(totalExpense);
+        document.getElementById("totalBalance").textContent = formatRupiah(totalBalance);
 
-        // Tambahkan event listener untuk tombol hapus
         document.querySelectorAll(".delete-btn").forEach(button => {
             button.addEventListener("click", function () {
                 let index = this.getAttribute("data-index");
@@ -51,17 +60,20 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function deleteTransaction(index) {
-        transactions.splice(index, 1);
-        saveTransactions();
-        renderTransactions();
+        const confirmDelete = confirm("Apakah Anda yakin ingin menghapus catatan ini?");
+        if (confirmDelete) {
+            transactions.splice(index, 1);
+            saveTransactions();
+            renderTransactions();
+        }
     }
 
     noteForm.addEventListener("submit", function (e) {
         e.preventDefault();
         const title = document.getElementById("title").value;
-        const amount = parseFloat(document.getElementById("amount").value);
+        const amount = unformatRupiah(amountInput.value);
         const date = document.getElementById("date").value;
-        const type = document.getElementById("type").value; // Ambil tipe transaksi dari dropdown
+        const type = document.getElementById("type").value;
 
         transactions.push({ title, amount, date, type });
         saveTransactions();
@@ -78,7 +90,6 @@ document.addEventListener("DOMContentLoaded", function () {
         noteModal.classList.add("hidden");
     });
 
-    // Filter Berdasarkan Jenis
     document.querySelectorAll(".filter-btn").forEach(button => {
         button.addEventListener("click", function () {
             document.querySelectorAll(".filter-btn").forEach(btn => btn.classList.remove("active"));
@@ -92,6 +103,17 @@ document.addEventListener("DOMContentLoaded", function () {
                 renderTransactions(transactions.filter(trx => trx.type === filterType));
             }
         });
+    });
+
+    amountInput.addEventListener("input", function (e) {
+        let cursorPosition = amountInput.selectionStart;
+        let angka = amountInput.value.replace(/[^0-9]/g, ""); // Hanya angka
+        let formattedValue = formatRupiah(angka);
+
+        amountInput.value = formattedValue;
+
+        let newCursorPosition = formattedValue.length - (angka.length - cursorPosition);
+        amountInput.setSelectionRange(newCursorPosition, newCursorPosition);
     });
 
     renderTransactions();
