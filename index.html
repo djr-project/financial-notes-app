@@ -5,16 +5,61 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Catatan Keuangan App</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
     <div class="container mx-auto p-4">
         <header class="flex justify-between items-center py-4">
-            <h1 class="text-2xl font-bold">Catatan Keuangan</h1>
-            <button id="addNoteBtn" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
-                + Tambah
-            </button>
+            <!-- Form Pencarian (rata kiri) -->
+            <div class="flex items-center gap-2">
+                <label for="searchInput" class="font-semibold text-white"></label>
+                <input type="text" id="searchInput" placeholder="Cari transaksi" 
+                    class="border border-blue-500 text-gray-700 placeholder-gray-400 p-2 pl-4 rounded-full w-60 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+            </div>            
+            
+        
+            <h1 class="text-2xl font-bold"></h1> <!-- Elemen tengah kosong (opsional) -->
+        
+            <!-- Tombol Filter (rata kanan) -->
+            <div>
+                <button id="toggleSidebarBtn" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                    Filter
+                </button>
+            </div>
+        
+            <!-- Sidebar -->
+            <div id="sidebar" class="fixed inset-0 bg-gray-800 bg-opacity-50 hidden z-40">
+                <div class="bg-white w-72 h-full shadow-lg p-4 space-y-6">
+                    <h3 class="text-lg font-semibold">Filter Transaksi</h3>
+        
+                    <!-- Dropdown untuk Filter Tahun -->
+                    <div class="relative">
+                        <label for="yearFilter" class="block text-sm font-medium text-gray-700">Tahun</label>
+                        <select id="yearFilter" class="block appearance-none w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                            <option value="all">Tahun</option>
+                            <!-- Tahun akan diisi menggunakan JavaScript -->
+                        </select>
+                    </div>
+        
+                    <!-- Dropdown untuk Filter Bulan -->
+                    <div class="relative">
+                        <label for="monthFilter" class="block text-sm font-medium text-gray-700">Bulan</label>
+                        <select id="monthFilter" class="block appearance-none w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                            <option value="all">Bulan</option>
+                            <!-- Bulan akan diisi menggunakan JavaScript -->
+                        </select>
+                    </div>
+        
+                    <br>
+                    <!-- Tombol Close Sidebar -->
+                    <button id="closeSidebar" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                        Simpan
+                    </button>
+                </div>
+            </div>
         </header>
+        
 
         <!-- Ringkasan Keuangan -->
         <div class="mb-4 grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -47,16 +92,10 @@
         </div>
 
 
-
-
         <!-- Container untuk catatan keuangan -->
         <div id="notesContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
-
-
-        <main>
-            <div id="notesContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
-        </main>
     </div>
+
 
     <!-- Modal -->
     <div id="noteModal" class="fixed inset-0 fade hidden items-center justify-center">
@@ -93,6 +132,11 @@
         </div>
     </div>
 
+
+
+    <button id="addNoteBtn" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+        + 
+    </button>
 
     <script src="js/script.js"></script>
 </body>
